@@ -2,19 +2,23 @@ import re
 
 def srcIP():
     ipAddress = input("What is the source IP Address: ")
-    validIpRegex = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
-    while validIpRegex != None:
+    validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
+    while validIpAddress != None:
         ipAddress = input("Please enter a valid IP Address: ")
+        validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
     return (ipAddress)
 
 def dstIP():
+    validIpAddress = None
     ipAddress = input("What is the destination IP Address: ")
-    validIpRegex = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
-    while validIpRegex != None:
+    validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
+    while validIpAddress != None:
         ipAddress = input("Please enter a valid IP Address: ")
+        validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
     return (ipAddress)
 
 def srcMAC():
+    validMacAddress = None
     macAddress = input("What is the source MAC Address: ")
     validMacAddress = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', macAddress, re.I).group()
     while validMacAddress != None:
@@ -22,10 +26,12 @@ def srcMAC():
     return (macAddress)
 
 def dstMAC():
+    validMacAddress = None
     macAddress = input("What is the source MAC Address: ")
     validMacAddress = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', macAddress, re.I).group()
     while validMacAddress != None:
         macAddress = input("Please enter a valid MAC address: ")
+        validMacAddress = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', macAddress, re.I).group()
     return (macAddress)
 
 def UDPCreate():
