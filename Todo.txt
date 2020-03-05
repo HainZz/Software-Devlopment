@@ -1,0 +1,6 @@
+Task List
+
+Research
+- DDoS tools
+- Techniques of DDoSing
+- How python can run a c program  
