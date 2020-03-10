@@ -3,6 +3,7 @@ import re
 def srcIP():
     ipAddress = input("What is the source IP Address: ")
     validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
+    #Does this check the IP is in a valid range i.e 0-255
     while validIpAddress != None:
         ipAddress = input("Please enter a valid IP Address: ")
         validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
