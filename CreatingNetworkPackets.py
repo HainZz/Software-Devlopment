@@ -1,10 +1,11 @@
 import re
+import ipaddress
+
 
 def srcIP():
     ipAddress = input("What is the source IP Address: ")
     validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
-    #Does this check the IP is in a valid range i.e 0-255
-    while validIpAddress != None:
+    while validIpAddress == None:
         ipAddress = input("Please enter a valid IP Address: ")
         validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
     return (ipAddress)
@@ -13,7 +14,7 @@ def dstIP():
     validIpAddress = None
     ipAddress = input("What is the destination IP Address: ")
     validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
-    while validIpAddress != None:
+    while validIpAddress == None:
         ipAddress = input("Please enter a valid IP Address: ")
         validIpAddress = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ipAddress)
     return (ipAddress)
@@ -21,22 +22,27 @@ def dstIP():
 def srcMAC():
     validMacAddress = None
     macAddress = input("What is the source MAC Address: ")
-    validMacAddress = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', macAddress, re.I).group()
-    while validMacAddress != None:
+    validMacAddress = re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", macAddress.lower())
+    while validMacAddress == None:
         macAddress = input("Please enter a valid MAC address: ")
+        validMacAddress = re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", macAddress.lower())
     return (macAddress)
 
 def dstMAC():
     validMacAddress = None
     macAddress = input("What is the source MAC Address: ")
-    validMacAddress = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', macAddress, re.I).group()
-    while validMacAddress != None:
+    validMacAddress = re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", macAddress.lower())
+    while validMacAddress == None:
         macAddress = input("Please enter a valid MAC address: ")
-        validMacAddress = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', macAddress, re.I).group()
+        validMacAddress = re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", macAddress.lower())
     return (macAddress)
 
 def UDPCreate():
     print("UDP File format")
+    srcIP()
+    srcMAC()
+    dstIP()
+    dstMAC()
 
 def TCPCreate():
     print("TCP File format")
