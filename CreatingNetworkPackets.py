@@ -39,10 +39,6 @@ def dstMAC():
 
 def UDPCreate():
     print("UDP File format")
-    srcIP()
-    srcMAC()
-    dstIP()
-    dstMAC()
 
 def TCPCreate():
     print("TCP File format")
