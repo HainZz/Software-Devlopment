@@ -21,8 +21,20 @@
                   <a class="nav-link" href="#">Profile <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#">Home</a>
+                  <a class="nav-link" href="{{url_for('index')}}">Home</a>
                 </li>
+                {% if current_user.is_anonymous %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('login')}}">Login</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class ="nav-link" href="{{url_for('register')}}">Register</a>
+                  </li>
+                {% else %}
+                  <li class ="nav-item">
+                    <a class="nav-link" href="{{url_for('logout')}}">Logout</a>
+                  </li>
+                {% endif %}
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Dropdown
@@ -45,5 +57,17 @@
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
         <!--Me using a simple CSS framework from bootstrap because i wanna make the front end not look garbage-->
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {%if messages %}
+        <u1>
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </u1>
+        {% endif %}
+        {% endwith %}
+        {%block content %}{% endblock %}
     </body>
 </html>
+
