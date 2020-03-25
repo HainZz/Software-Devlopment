@@ -1,3 +1,5 @@
+<!--Credit too : https://getbootstrap.com/docs/4.1/components/navbar/ for the navbar-->
+
 {% extends 'bootstrap/base.html' %}
 {% block title %}
     {%if title %}
@@ -31,7 +33,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active text-light">
-          <a class="nav-link" href="#">Profile <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="#">Profile</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{url_for('index')}}">Home</a>
@@ -54,14 +56,15 @@
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href="{{url_for('PCAPFabricator')}}">PCAP Fabricator</a>
               <a class="dropdown-item" href="{{url_for('DDos')}}">DDOS Machine</a>
-              <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="{{url_for('SQLBuster')}}">SQL Buster</a>
+              <a class="dropdown-item" href="{{url_for('PCAPAnalyser')}}">PCAP File Analyser</a>
+              <div class="dropdown-divider"></div>
             </div>
         {% endif %}
         </li>
       </ul>
     </div>
-  </nav>')'
+  </nav>
 {% endblock %}
 
 {% block content %}
