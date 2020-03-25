@@ -1,9 +1,10 @@
 from app import app,db #Imports app variable from app and db
-from flask import render_template, flash,redirect, url_for, request
-from app.forms import LoginForm,RegistrationForm
+from flask import render_template, flash,redirect, url_for, request, session, send_file
+from app.forms import LoginForm,RegistrationForm,FileUpload
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User,PCAPFiles
 from werkzeug.urls import url_parse
+from io import BytesIO
 
 @app.route('/') #Home /root directory
 @app.route('/index')
@@ -46,7 +47,22 @@ def register():
         flash('You are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
-'''
+
+@login_required
+@app.route('/PCAPAnalyser', methods=['GET','POST'])
+def PCAPAnalyser():
+    form = FileUpload()
+    if request.method == 'POST' and form.validate_on_submit():
+        file_input = request.files['file_input']
+        NewFile = PCAPFiles(FileName=file_input.filename, data=file_input.read())
+        db.session.add(NewFile)
+        db.session.commit()
+        flash('Your PCAP file has been uploaded!')
+        return redirect(url_for('index'))
+    else:
+        return render_template('FileUpload.html', form=form, title='PCAP Upload')
+
+
 @login_required
 @app.route('/PCAPFabricator', methods=['GET','POST'])
 def PCAPFabricator():
@@ -61,4 +77,3 @@ def SQLBuster():
 @app.route('/DDos', methods=['GET','POST'])
 def DDos():
     pass
-'''
