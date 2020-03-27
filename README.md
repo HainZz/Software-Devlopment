@@ -2,11 +2,10 @@
 Days without incident : 0
 
 # To Do: 
- - Find out how to take in pcap files
-   - take in hex from file
-   - locate the protocol type
-   - traverse to the protocol type and not it down, along with the packet number
+ - ~~Find out how to take in pcap files~~ > pcap.h
+   - locate the protocol type and note it down
    - store info in struct
+   - add more stats where possible, need to look into <net/ethernet.h> and similar ones
  - Create a suitable output for frontend
    - clean struct containing all extracted info
    - possibly easy statictics for graphing
