@@ -13,6 +13,8 @@ Days without incident : 0
 
 # Deadlines
  - frontend - 1st april
- - tools conpleted - 16th
- - completed - 23rd april
- - hand in - 10th may
+ - tools completed - 20th april
+ - bug testing - 27rd april  - 3rd may 
+ - Documentation - 4th - 17th may 
+ - Panic - 17th - end
+ - hand in - 24th(?) may
