@@ -1,52 +1,60 @@
-
+/*references: 
+	https://www.devdungeon.com/content/using-libpcap-c#packet-type - last accessed - 27/03/20
+	https://www.geeksforgeeks.org/quick-sort/ - last accessed 09/04/20
+*/
 /* standard libraries */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* defines the IP protcols, UDP, TCP, ICMP */
+/* contains structs to dismantle each pcap and retrieve info */
 #include <netinet/in.h>
 #include <netinet/ip.h>
-/*#include <net/if.h>*/
 #include <netinet/if_ether.h>
-
-/* used to determine if the packet is ip, arp, etc. */
 #include <net/ethernet.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 #include <arpa/inet.h>
 
+/* used to extract each packet for processing */
 #include <pcap.h>
 
 #define PCAP_BUF_SIZE	100000
 #define PCAP_SRC_FILE	2
 
-/* traks how many packets a source ip has sent */
+/* tracker variables */
 int pctCount[PCAP_BUF_SIZE];
+int srcPortCount[PCAP_BUF_SIZE];
 int udpCount;
 int tcpCount;
 int arpCount;
 int etcCount;
-/* how many unique packets have been sent, used to iterate through  */
+
+
+/* how many unique packets/ports have been sent, used to iterate through  */
 int pctIdx = 0;
-/* stores the ip address of the packet */
+int PortIdx = 0;
+/* stores the ip address/ port numbers of the packets */
 char pctIP[PCAP_BUF_SIZE][INET_ADDRSTRLEN];
+int PortNum[PCAP_BUF_SIZE];
 
 
+/* pre calls the functions to allow main() to be topmost */
 void printout();
 void packetprocess(u_char *userData, const struct pcap_pkthdr* pkthdr, const u_char* packet);
-void quickSort(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN]);
-int partition(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN]);
+void quickSort(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN], int intarray[],int mode);
+int partition(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN],int intarray[], int mode);
 void swap(int* num1, int* num2);
 void stringswap(char *str1, char *str2);
 
 
-
+/* takes 2 args, argc holds the number of arguments passed, argv points to each argument passed  */
 int main(int argc, char **argv){
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap_t *file;
 	
-	if(argc != 2){ /* checks that a file has been specified in execution */
+	/* checks that a file has been specified in execution */
+	if(argc != 2){ 
 		printf("please include filename in command {%s filename.pcap}\n", argv[0]);
 		return -1;
 	}
@@ -63,52 +71,56 @@ int main(int argc, char **argv){
 		fprintf(stderr,"process failed on pcap_loop, %s\n", pcap_geterr(file)); 
 		return 0;
 	}
-	/* sorts the ip source count then prints the output */
-    quickSort(pctCount, 0, pctIdx, pctIP);
+	/* sorts the ip source count then prints the output, mode 1 = ip, 2 = port */
+    quickSort(pctCount, 0, pctIdx, pctIP, PortNum, 1);
+	quickSort(srcPortCount, 0, PortIdx, pctIP, PortNum, 2);
 	printout();
+	
 
 	return 0;
 }
 
 void packetprocess(u_char *userData, const struct pcap_pkthdr* pkthdr, const u_char* packet){ /* where the packets are poked around with, some crazy shits happening here */
-	const struct ether_header* ethernetHeader; /* used to determine wether the packet is an IP packet or not */
-	/* check for TCP, UDP, ICMP, IP, IPV6 */
-	const struct ip* ipHeader;
-	const struct tcphdr* tcpHeader;
-	const struct udphdr* udpHeader;
+	const struct ether_header* ethernetHeader; /* used to determine the ether type of the packet */
+	const struct ip* ipHeader; /* if the packet is of ip ether type, this determines the ip protocol */
+	const struct tcphdr* tcpHeader; /* if the packet uses tcp, this gives the infomation about it */
+	const struct udphdr* udpHeader;/* if the packet uses udp, this gives the infomation about it */
+	
 	char sourceIP[INET_ADDRSTRLEN];
    	char destIP[INET_ADDRSTRLEN];
-	char etherD[INET_ADDRSTRLEN];
-	int loopcheck = 0;
-   	
+
+	int loopcheckPct = 0;
+	int loopcheckPrt = 0;
+   	int port;
 	
-	/* TCP, UDP, ICMP */
-	
-	
+	/* gets ethernet related information from the packet */
    	ethernetHeader = (struct ether_header*)packet;
-	if (ntohs(ethernetHeader->ether_type) == ETHERTYPE_IP){
+
+	if (ntohs(ethernetHeader->ether_type) == ETHERTYPE_IP){/* ip check */
 		printf("%s", "  IP, ");
-		/* fill out the ip header, gets the info from ether header? unwraps it? */
+		/* gets ip related information from the packet */
 		ipHeader = (struct ip*)(packet + sizeof(struct ether_header));
 		/* inet_ntop - convert IPv4 and IPv6 addresses from binary to text form*/
 		/* we save the source and destination ip's into variables here */
 		inet_ntop(AF_INET, &(ipHeader->ip_src), sourceIP, INET_ADDRSTRLEN);
         inet_ntop(AF_INET, &(ipHeader->ip_dst), destIP, INET_ADDRSTRLEN);
 
-	   	/* is the header TCP? */
+	   	/* if packet is TCP packet infomation is extracted and tallied */
 		if (ipHeader -> ip_p == IPPROTO_TCP){
 			tcpHeader = (struct tcphdr*)packet;
 			tcpCount = tcpCount + 1;
+			port = tcpHeader -> th_sport;
 			printf("%s", "  TCP, ");
 			printf("  src: %15s    dst: %15s ,", sourceIP, destIP);
 			printf("  sport: %10d  dport: %10d", tcpHeader -> th_sport,tcpHeader -> th_dport);
 			
 		}
 		
-		/* is the header UDP? */
+		/* if packet is UDP packet infomation is extracted and tallied */
 		if (ipHeader -> ip_p == IPPROTO_UDP){
 			udpHeader = (struct udphdr*)packet;
 			udpCount = udpCount + 1;
+			port = udpHeader -> uh_sport;
 			printf("%s", "  UDP, ");
 			printf("  src: %15s    dst: %15s ,", sourceIP, destIP);
 			printf("  sport: %10d  dport: %10d", udpHeader -> uh_sport,udpHeader -> uh_dport);
@@ -116,28 +128,43 @@ void packetprocess(u_char *userData, const struct pcap_pkthdr* pkthdr, const u_c
 
 		/* checks if the ip has sent packets before
 		if it has its counter is incremented, if it hasnt a new counter is created */	
-    	  for (int i = 0; i < pctIdx; i++) {
-     	      if (strcmp(sourceIP, pctIP[i]) == 0) {
-		      	pctCount[i] = pctCount[i] + 1;
-				loopcheck = 1;				
+    	for (int i = 0; i < pctIdx; i++) {
+     	    if (strcmp(sourceIP, pctIP[i]) == 0) {
+		    	pctCount[i] = pctCount[i] + 1;
+				loopcheckPct = 1;				
    	      }
 		}
-		
-
-		if (loopcheck == 0){	
+		/* add new ip */
+		if (loopcheckPct == 0){	
 			strcpy(pctIP[pctIdx], sourceIP);
    	 	    pctCount[pctIdx] = 1;
 			pctIdx = pctIdx + 1;	
 		}
-		loopcheck = 0;
-	}	
 
+		/* checks if the port has beed used before
+		if it has its counter is incremented, if it hasnt a new counter is created */	
+    	for (int i = 0; i < PortIdx; i++) {
+     	    if (port == PortNum[i]) {
+		      	srcPortCount[i] = srcPortCount[i] + 1;
+				loopcheckPrt = 1;				
+   	      }
+		}
+		/* add new port */
+		if (loopcheckPrt == 0){	
+			PortNum[PortIdx] = port;
+   	 	    srcPortCount[PortIdx] = 1;
+			PortIdx = PortIdx + 1;	
+		}
+		loopcheckPct = 0; loopcheckPrt = 0; 
+	}	
+	/* if ethertype is arp add to related tally */
 	else if (ntohs(ethernetHeader->ether_type) == ETHERTYPE_ARP){
 		printf("%s", "  ARP, ");
 		arpCount = arpCount + 1;
 			
 	}
 
+	/* ether types not defined in the struct, added from testing */
 	else if (ntohs(ethernetHeader->ether_type) == 35020){
 		printf("%s", "  LLDP ");
 		etcCount = etcCount + 1;
@@ -155,20 +182,27 @@ void packetprocess(u_char *userData, const struct pcap_pkthdr* pkthdr, const u_c
 	printf("\n");
 }
 
-/* quick function to printout the end stats */
+/* function to printout the end stats */
 void printout(){
-
+	printf("\n\n");
 	printf("TCP packet count: %d\n", tcpCount);
 	printf("UDP packet count: %d\n", udpCount);
 	printf("ARP packet count: %d\n", arpCount);
-	printf("other protocol count : %d\n", etcCount);
+	printf("other protocol count: %d\n", etcCount);
 	printf("total packet count: %d\n", tcpCount + udpCount + arpCount + etcCount);
-
 	printf("source ip that sent the most packets: %s\n", pctIP[pctIdx]);
+	printf("top 5 most packet sending ip's: \n");
+	for (int i = pctIdx; i != pctIdx - 5; i--){
+		printf("%5sip: %15s   count: %6d\n"," ",pctIP[i], pctCount[i]);
+	}
+	printf("source port count: \n");
+	for (int i = PortIdx; i != 0; i--){
+		printf("%5sport num: %7d     count: %6d\n"," ",PortNum[i], srcPortCount[i]);
+	}
 
 }
 
-/* https://www.geeksforgeeks.org/quick-sort/ */
+
 /* Small function to swap two variables */
 void swap(int* num1, int* num2){
 	int temp = *num1;
@@ -187,30 +221,45 @@ void stringswap(char *str1, char *str2){
 	free(temp);
 }
 
+/* https://www.geeksforgeeks.org/quick-sort/ - last accessed 09/04/20*/
 /* function to find the pivot point (the last element of the specified region) 
    and sorts around the given pivot */
-int partition(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN]){
+int partition(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN],int intarray[], int mode){
 	int pivot = array[high]; /* section of array to pivot around */
 	int i = (low - 1); /* location of low element */
 	for (int j = low; j <= high - 1; j++){
 		if(array[j] < pivot){
 				i++;
 				swap(&array[i], &array[j]);
-				stringswap(strArray[i],strArray[j] );
+				if (mode == 1){
+					stringswap(strArray[i],strArray[j]);
+				}
+				else
+				{
+					swap(&intarray[i], &intarray[j]);
+				}
+				
 		}
 	}
 	swap(&array[i + 1], &array[high]);
-	stringswap(strArray[i +1],strArray[high]);
+	if (mode == 1){
+		stringswap(strArray[i +1],strArray[high]);
+	}
+	else
+	{
+		swap(&intarray[i + 1], &intarray[high]);
+	}
 	return (i + 1);
 }
 
+/* https://www.geeksforgeeks.org/quick-sort/ - last accessed 09/04/20*/
 /* recursive function to sort the ip doddledoos */
 /* low is the starting index, high is the end of the filled array */
-void quickSort(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN]){
+void quickSort(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_ADDRSTRLEN], int intarray[],int mode){
 	if (low < high){
-		int partitionIndex = partition(array, low, high, strArray);
-		quickSort(array, low, partitionIndex - 1, strArray);
-		quickSort(array, partitionIndex + 1, high, strArray);
+		int partitionIndex = partition(array, low, high, strArray, intarray, mode);
+		quickSort(array, low, partitionIndex - 1, strArray, intarray, mode);
+		quickSort(array, partitionIndex + 1, high, strArray, intarray, mode);
 
 	}
 }
