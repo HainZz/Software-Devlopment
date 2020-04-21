@@ -7,11 +7,40 @@
 //Error handling for IP_HDRINCL
 #include <errno.h>
 
+//inet functions
 #include <netinet/tcp.h>
 #include <netinet/ip.h>
+#include <arpa/inet.h> 
 
-int main()
+void source(int argc, char **argv)
 {
+	unsigned long ip = 0;
+
+    if (0 == inet_pton(AF_INET, argv[1], &ip)) 
+    {
+		printf("Invalid IP\n");
+   		exit(0);
+    }
+
+}
+
+void destination(int argc, char **argv)
+{
+	unsigned long ip = 0;
+
+    if (0 == inet_pton(AF_INET, argv[2], &ip)) 
+    {
+		printf("Invalid IP\n");
+		exit(0);
+    }
+
+}
+
+int main(int argc, char ** argv)
+{
+	source(argc, argv);
+	destination(argc, argv);
+	
 //Create socket
 	int sock = socket (PF_INET, SOCK_RAW, IPPROTO_TCP);
 
@@ -24,17 +53,9 @@ int main()
 //TCP header
 	struct tcphdr *tcph = (struct tcphdr *) (datagram + sizeof (struct ip)); 
 	struct sockaddr_in sin;
-	
-/*	
-	Don't like this but can't figure out a better way to get the source IP yet. 
-	Could do 192.168.random_number.random_number but would probably slow the program down.
-*/
-	strcopy(source_ip, "192.168.1.2");
-	
-//Destination IP will be taken from user input. Almost certainly from inet_aton but need to figure out how it works. 
+
 	sin.sin_family = AF_INET;
 	sin.sin_port  = htons(80)
-	sin.sin_addr.s_addr = inet.addr (//Destination IP goes here)
 	
 	memset (datagram, 0, 4096); 
 	
@@ -47,8 +68,8 @@ int main()
 	iph -> frag_off = 0;
 	iph -> ttl = 255;			
 	iph -> protocol = IPPROTO_TCP;
-	iph -> saddr = inet_addr (source_ip);
-	iph -> daddr = sin.sin_addr.s_addr;
+	iph -> saddr = inet_addr (argv[1]);
+	iph -> daddr = inet_addr (argv[2]);
 	
 //Setting TCP header parameters
 
@@ -66,7 +87,6 @@ int main()
 	tcph -> window = htons(5840);	//Window size
 	tcph -> urg_ptr = 0;
 	
-//Need to do more research to fully understand this
 //Seems unnecessary but requires a pointer in setsockopt
 	int one = 1;
 	const int *val = &one;
