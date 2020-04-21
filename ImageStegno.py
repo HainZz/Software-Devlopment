@@ -1,6 +1,8 @@
 from PIL import Image as img
 import binascii
 from os.path import getsize
+import wave
+
 
 #Credit too https://github.com/xandhiller/steg/blob/master/encodeImage.py for the ideas of how to use the classes i really like it :)
 #Credit too https://www.youtube.com/watch?v=q3eOOMx5qoo for showing hexlify 
@@ -9,7 +11,7 @@ END_MSG_RGB = '1111111111111110'
 
 class text:
     def __init__(self):
-        TextFile = open("Message.txt","rb")
+        TextFile = open("Message.txt","rb") #TODO allow input of filenames
         self.RawData = TextFile.read()
         self.TextBinary = self.GetBinary()
         self.Payload = self.TextBinary + END_MSG_RGB #This here is the delimeter that signifies the end of the message
@@ -22,9 +24,26 @@ class text:
 class image:
     def __init__(self):
         self.image = img.open("Test.png")
-        self.image_type = self.image.format
+        self.image_type = self.image.format #TODO Check Image Formats as well as mode 
         self.MaxSize = self.image.size[0] * self.image.size[1]
         self.Image_Mode =  self.image.mode
+
+#https://github.com/pavanchhatpar/wav-steg-py/blob/master/wav-steg.py Credit for helping me understand the way waves works :)
+
+class sound:
+    def __init__(self):
+        self.Sound_File = wave.open("Test.wav","rb")
+        #Opens up a Wave_Read object
+        self.Channles = self.Sound_File.getnchannels() 
+        self.SampleWidth = self.Sound_File.getsampwidth()
+        self.FrameRate = self.Sound_File.getframerate()
+        self.NumberOfFrames = self.Sound_File.getnframes()
+        self.CompressionType = self.Sound_File.getcomptype()
+        self.CompressionName = self.Sound_File.getcompname()
+        #These Variables will be needed later in order to create a new wav file after encoding
+        print(self.Sound_File.readframes(1))
+        
+
 
 def Determine_Hide_Func(Image,Text):
     if Image.Image_Mode == 'L':
@@ -52,7 +71,18 @@ def DetermineStegnoPossible(Image,Text):
 
 
 def L_Image_Mode_Hide(Image,Text):
-    pass
+    NewImage = img.new("L", (Image.image.size[0], Image.image.size[1]), "white")
+    Bitstream = list(Text.Payload)
+    for i in range(Image.image.size[0]):
+        for j in range(Image.image.size[1]):
+            ImRed= Image.image.getpixel((i,j))
+            if len(Bitstream) != 0:
+                NewBit = Bitstream[0]
+                ImRed = Replace_Bit(ImRed,NewBit)
+                del Bitstream[0]
+            NewImage.putpixel((i,j),(ImRed))
+    NewImage.save("EncodedImage.png")
+    #TODO Better Saving Structure 
 
 def Replace_Bit(ImageRedValue,RedLSBValue):
     BinaryValue = list(bin(ImageRedValue))
@@ -60,7 +90,25 @@ def Replace_Bit(ImageRedValue,RedLSBValue):
     return int(''.join(BinaryValue),2)
 
 def RBG_Image_Mode_Hide(Image,Text):
-    pass
+    NewImage = img.new("RGB", (Image.image.size[0], Image.image.size[1]), "white")
+    Bitstream = list(Text.Payload)
+    for i in range(Image.image.size[0]):
+        for j in range(Image.image.size[1]):
+            ImRed, ImGreen, ImBlue = Image.image.getpixel((i,j))
+            if len(Bitstream) != 0:
+                NewBit = Bitstream[0]
+                ImRed = Replace_Bit(ImRed,NewBit)
+                del Bitstream[0]
+            if len(Bitstream) != 0:
+                NewBit = Bitstream[0]
+                ImGreen = Replace_Bit(ImGreen,NewBit)
+                del Bitstream[0]
+            if len(Bitstream) != 0:
+                NewBit = Bitstream[0]
+                ImBlue = Replace_Bit(ImBlue,NewBit)
+                del Bitstream[0]
+            NewImage.putpixel((i,j),(ImRed,ImGreen,ImBlue))
+    NewImage.save("EncodedImage.png")
 
 
 
@@ -107,15 +155,25 @@ def Determine_Show_Func():
     return Message
 
 def Show_L_Encode(EncodedImage):
-    pass
+    EncodedBitStream = ''
+    for i in range (EncodedImage.size[0]):
+        for j in range (EncodedImage.size[1]):
+            Red = EncodedImage.getpixel((i,j))
+            EncodedBitStream = EncodedBitStream + (bin(Red)[-1:]) # Take LSB from Red 
+            if EncodedBitStream[-16:] == (END_MSG_RGB):
+                return BinaryToString(EncodedBitStream[:-16]) 
 
 def Show_RBGA_Encode(EncodedImage):
     EncodedBitStream = ''
     for i in range (EncodedImage.size[0]):
         for j in range (EncodedImage.size[1]):
             Red,Green,Blue,AmberVal = EncodedImage.getpixel((i,j))
-            EncodedBitStream = EncodedBitStream + (bin(Red)[-1:]) # Take the least signifanct bit from the Red value
+            EncodedBitStream = EncodedBitStream + (bin(Red)[-1:]) # Take LSB from Red 
+            if EncodedBitStream[-16:] == (END_MSG_RGB):
+                return BinaryToString(EncodedBitStream[:-16]) 
             EncodedBitStream = EncodedBitStream + (bin(Green)[-1:])
+            if EncodedBitStream[-16:] == (END_MSG_RGB):
+                return BinaryToString(EncodedBitStream[:-16])
             EncodedBitStream = EncodedBitStream + (bin(Blue)[-1:])
             if EncodedBitStream[-16:] == (END_MSG_RGB):
                 return BinaryToString(EncodedBitStream[:-16])
@@ -127,22 +185,44 @@ def BinaryToString(EncodedMessage):
   return message
   
 
-
-
-
 def Show_RBG_Encode(EncodedImage):
-    pass
+    EncodedBitStream = ''
+    for i in range (EncodedImage.size[0]):
+        for j in range (EncodedImage.size[1]):
+            Red,Green,Blue = EncodedImage.getpixel((i,j))
+            EncodedBitStream = EncodedBitStream + (bin(Red)[-1:]) # Take LSB from Red 
+            if EncodedBitStream[-16:] == (END_MSG_RGB):
+                return BinaryToString(EncodedBitStream[:-16]) 
+            EncodedBitStream = EncodedBitStream + (bin(Green)[-1:])
+            if EncodedBitStream[-16:] == (END_MSG_RGB):
+                return BinaryToString(EncodedBitStream[:-16])
+            EncodedBitStream = EncodedBitStream + (bin(Blue)[-1:])
+            if EncodedBitStream[-16:] == (END_MSG_RGB):
+                return BinaryToString(EncodedBitStream[:-16])
 
 
 def PrintMessage(Message):
     print('Success We found you a message ! :')
     print(Message)
 
+def DetermineSoundStegnoPossible(Sound):
+    pass
+
 
 if __name__ == "__main__":
-    Text = text()
-    Image = image()
-    DetermineStegnoPossible(Image,Text)
-    Determine_Hide_Func(Image,Text)
-    Message = Determine_Show_Func()
-    PrintMessage(Message)
+    Image_Or_Sound = input("S = SOUND | I = IMAGE ") #TODO replace this with input from the front-end
+    Encode_Or_Decode = input("E = ENCODE | D = DECODE ")
+    if Image_Or_Sound == "I":
+        if Encode_Or_Decode == "E":  
+            Text = text()
+            Image = image()  
+            DetermineStegnoPossible(Image,Text)
+            Determine_Hide_Func(Image,Text)
+        elif Encode_Or_Decode == "D":         
+            Message = Determine_Show_Func()
+            PrintMessage(Message)
+    elif Image_Or_Sound == "S":
+        if Encode_Or_Decode == "E":
+            Text = text()
+            Sound = sound()
+            DetermineSoundStegnoPossible(Sound)
