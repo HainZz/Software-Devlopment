@@ -17,4 +17,4 @@ Days without incident : 0
  - bug testing - 27rd april  - 3rd may 
  - Documentation - 4th - 17th may 
  - Panic - 17th - end
- - hand in - 24th(?) may
+ - hand in - 31th may
