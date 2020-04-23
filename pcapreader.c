@@ -212,7 +212,7 @@ void swap(int* num1, int* num2){
 	return;
 }
 
-/* added this to swap around the PctIP array with their related counts, this shit took waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too long */
+/* added this to swap around the PctIP array with their related counts*/
 void stringswap(char *str1, char *str2){
 	char *temp = (char *)malloc((strlen(str1) + 1) * sizeof(char));
 	strcpy(temp, str1);
