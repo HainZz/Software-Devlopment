@@ -13,6 +13,7 @@ message =  ('01 01 00 08'   #Foo Base Header
 
 import sys
 import binascii
+import socket
 
 #Global header for pcap 2.4
 pcap_global_header =   ('D4 C3 B2 A1'   
@@ -38,7 +39,7 @@ ip_header =    ('45'                    #IP version and header length (multiples
                 'XX XX'                 #Length - will be calculated and replaced later
                 '00 00'                   
                 '40 00 40'                
-                '11'                    #Protocol (0x11 = UDP)          
+                '11'                    #Protocol (0x11 = UDP)           
                 'YY YY'                 #Checksum - will be calculated and replaced later      
                 '7F 00 00 01'           #Source IP (Default: 127.0.0.1)         
                 '7F 00 00 01')          #Dest IP (Default: 127.0.0.1) 
@@ -58,17 +59,16 @@ def writeByteStringToFile(bytestring, filename):
     bitout.write(bytes)
 
 def generatePCAP(message,port,pcapfile): 
-
     udp = udp_header.replace('XX XX',"%04x"%port)
-    udp_len = getByteLength(message) + getByteLength(udp_header)
+    udp_len = int(getByteLength(message) + getByteLength(udp_header))
     udp = udp.replace('YY YY',"%04x"%udp_len)
 
-    ip_len = udp_len + getByteLength(ip_header)
+    ip_len = int(udp_len + getByteLength(ip_header))
     ip = ip_header.replace('XX XX',"%04x"%ip_len)
     checksum = ip_checksum(ip.replace('YY YY','00 00'))
     ip = ip.replace('YY YY',"%04x"%checksum)
     
-    pcap_len = ip_len + getByteLength(eth_header)
+    pcap_len = int(ip_len + getByteLength(eth_header))
     hex_str = "%08x"%pcap_len
     reverse_hex_str = hex_str[6:] + hex_str[4:6] + hex_str[2:4] + hex_str[:2]
     pcaph = pcap_packet_header.replace('XX XX XX XX',reverse_hex_str)
@@ -101,37 +101,31 @@ def ip_checksum(iph):
 """ End of functions, execution starts here: """
 """------------------------------------------"""
 
-#Function used to define the User's desired protocol
-while True:
-    protocol = input("What protocol PCAP file do you want to create?\nUDP\tTCP\tICMP\tHTTP\tARP\tDHCP\n")
-    if protocol == "UDP" or protocol == "udp":
-        port = int(input("What's the port number:\t"))
-        break
-    elif protocol == "TCP" or protocol == "tcp":
-        port = int(input("What's the port number:\t"))
-        break
-    elif protocol == "ICMP" or protocol == "icmp":
-        port = int(input("What's the port number:\t"))
-        break
-    elif protocol == "HTTP" or protocol == "http":
-        port = int(input("What's the port number:\t"))
-        break
-    elif protocol == "ARP" or protocol == "arp":
-        port = int(input("What's the port number:\t"))
-        break
-    elif protocol == "DHCP" or protocol == "dhcp":
-        port = int(input("What's the port number:\t"))
-        break
-    else:
-        print("Invalid protocol, please use one of the protocols defined")
-
-##############################################################################################################################################################
-message = input("What message do you want to send within the packet?\n")
+#############################################################################################################################################################
+message = input("What message do you want to send within the packet?\t(Max 31 bytes of information)\n")
 message = message.encode("utf-8")
 message = message.hex()
-
-##############################################################################################################################################################
-
+#############################################################################################################################################################
+port = int(input("What's the port number:\t"))
+#############################################################################################################################################################
+src_ip_adress = str(input("What is the source Ip Adress?\n"))
+src_ip_adress = binascii.hexlify(socket.inet_aton(src_ip_adress)).decode().upper()      #checks valid ip then hexififies then decodes to string into making the values uppercase
+ip_header = ip_header.replace('YY YY7F 00 00 01', 'YY YY'+src_ip_adress)
+#############################################################################################################################################################
+dst_ip_adress = str(input("What is the Destination Ip Adress?\n"))
+dst_ip_adress = binascii.hexlify(socket.inet_aton(dst_ip_adress)).decode().upper()      #checks valid ip then hexififies then decodes to string into making the values uppercase
+ip_header = ip_header.replace('7F 00 00 01', dst_ip_adress)
+#############################################################################################################################################################
+dst_mac_adress = input('What is the source mac adress?\n(Assigning an mac adress changes the protocol of the pcap file to LLC not UDP. Enter 0 to not change the UDP protocol\n')
+if dst_mac_adress != '0':
+    dst_mac_adress = dst_mac_adress.replace(":","").upper()
+    eth_header = eth_header.replace("00 00 00 00 00 0008 00", dst_mac_adress+"08 00")
+#############################################################################################################################################################
+src_mac_adress = input('What is the source mac adress?\n(Assigning an mac adress changes the protocol of the pcap file to LLC not UDP. Enter 0 to not change the UDP protocol)\n')
+if src_mac_adress != '0':
+    src_mac_adress = src_mac_adress.replace(":","").upper()
+    eth_header = eth_header.replace("00 00 00 00 00 00", src_mac_adress)
+#############################################################################################################################################################
 if len(sys.argv) < 2:
         print ('usage: pcapgen.py output_file')
         exit(0)
