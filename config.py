@@ -7,3 +7,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS= False
+    UPLOAD_IMAGES_ENCODE_STEGNO = '/home/hainzz/Software-Devlopment/app/static/Stegno/Encode/Images'
+    UPLOAD_MESSAGES_ENCODE_STEGNO = '/home/hainzz/Software-Devlopment/app/static/Stegno/Encode/Messages'
+    UPLOAD_IMAGES_DECODE_STEGNO = '/home/hainzz/Software-Devlopment/app/static/Stegno/Decode/Images'
+    PCAP_UPLOAD_DEST = '/home/hainzz/Software-Devlopment/app/static/PCAP'

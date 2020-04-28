@@ -1,0 +1,8 @@
+{% extends "base.html"%}
+{%block title%}{{title}}{%endblock%}
+
+{%block app_content %}
+    <h1>Choose Whether You Want To Encode Image Or Sound</h1>
+    <a class ="btn btn-secondary btn-lg" href="{{url_for('SoundEncode')}}">Sound</a>
+    <a class ="btn btn-secondary btn-lg" href="{{url_for('ImageEncode')}}">Image</a>
+{% endblock %}

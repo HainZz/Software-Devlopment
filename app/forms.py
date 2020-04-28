@@ -32,10 +32,12 @@ class FileUpload(FlaskForm):
 class PCAPFab(FlaskForm):
     pass
 
+
 class DDOS(FlaskForm):
     ip_addr = StringField('IP Adress', validators=[DataRequired(), IPAddress(message='Invalid IP address', ipv4=True, ipv6=True)])
     submit = SubmitField(label='Enter')
 
-class SQLBuster(FlaskForm):
-    file_input = FileField('', validators=[FileRequired(message='You didnt upload a file'), FileAllowed(['txt'], message='Must be a txt file')])
+class ImageStegnoHide(FlaskForm):
+    Image_file_input = FileField('Image Upload', validators=[FileRequired(message='You didnt upload a image file'),FileAllowed(['png','bmp','jpeg'], message='Must be of the format PNG|BMP|JPEG')])
+    file_input = FileField('Message Upload', validators=[FileRequired(message='You didnt upload a  text file'), FileAllowed(['txt'], message='Must be a txt file')])
     submit = SubmitField(label='Upload')
