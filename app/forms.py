@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, IPAddress
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
+from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, IPAddress, MacAddress, NumberRange
 from app.models import User
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
@@ -30,11 +30,17 @@ class FileUpload(FlaskForm):
     submit = SubmitField(label='Upload')
 
 class PCAPFab(FlaskForm):
-    pass
-
+    Message = StringField('PCAP Message', validators=[DataRequired()])
+    Port = IntegerField('Port Number', validators=[DataRequired(),NumberRange(min=0, max=65535, message="Invalid Port Number")])
+    Source_IP = StringField('Source IP Adress', validators=[DataRequired(), IPAddress(message='Invalid IP address', ipv4=True)])
+    Dest_IP = StringField('Destination IP Adress', validators=[DataRequired(), IPAddress(message='Invalid IP address', ipv4=True)])
+    Destination_Mac_Adress = StringField('Destination Mac Adress', validators=[DataRequired(), MacAddress(message='Invalid MAC Adress')])
+    Source_Mac_Adress = StringField('Source MAC Adress', validators=[DataRequired(), MacAddress(message='Invalid MAC Adress')])
+    Output_File_Name = StringField('Output File Name', validators=[DataRequired()])
+    Submit = SubmitField('CREATE')
 
 class DDOS(FlaskForm):
-    ip_addr = StringField('IP Adress', validators=[DataRequired(), IPAddress(message='Invalid IP address', ipv4=True, ipv6=True)])
+    ip_addr = StringField('IP Adress', validators=[DataRequired(), IPAddress(message='Invalid IP address', ipv4=True)])
     submit = SubmitField(label='Enter')
 
 class ImageStegnoHide(FlaskForm):

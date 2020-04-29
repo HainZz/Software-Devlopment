@@ -2,11 +2,10 @@ from app import app,db #Imports app variable from app and db
 from flask import render_template, flash,redirect, url_for, request, session, send_file
 from app.forms import LoginForm,RegistrationForm,FileUpload,DDOS,ImageStegnoHide,PCAPFab
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User,DosDb
+from app.models import User,DosDb,PCAPDb
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 import os
-
 
 
 @app.route('/') #Home /root directory
@@ -51,14 +50,14 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
-@login_required
 @app.route('/user/<username>')
+@login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     return render_template('profile.html', user=user)
 
-@login_required
 @app.route('/PCAPAnalyser', methods=['GET','POST'])
+@login_required
 def PCAPAnalyser():
     form = FileUpload()
     if request.method == 'POST' and form.validate_on_submit():
@@ -70,63 +69,72 @@ def PCAPAnalyser():
     else:
         return render_template('FileUpload.html', form=form, title='PCAP Upload')
 
-@login_required
 @app.route('/PCAPFabricator', methods=['GET','POST'])
+@login_required
 def PCAPFabricator():
-    pass
-    
+    form = PCAPFab()
+    if request.method == 'POST' and form.validate_on_submit():
+        PCAP = PCAPDb(message=form.Message.data,port=form.Port.data,src_ip=form.Source_IP.data,Dest_ip=form.Dest_IP.data,Dest_mac=form.Destination_Mac_Adress.data,Source_mac=form.Source_Mac_Adress.data,Output_file=form.Output_File_Name.data)
+        db.session.add(PCAP)
+        db.session.commit()
+        flash('Your PCAP information has been saved')
+        return redirect(url_for('index'))
+    else:
+        return render_template('PCAPFAb.html', form=form, title='PCAP Creator')
 
 #https://stackoverflow.com/questions/19794695/flask-python-buttons/19794878 Thanks for showing Flask buttons
 
-@login_required
+
+
 @app.route('/StegnoEncodeDecode')
+@login_required
 def EncodeDecode():
     return render_template('ChooseEncodeDecode.html', title='Encode|Decode Choice')
 
-@login_required
 @app.route('/ImageSoundDecode')
+@login_required
 def ImageSoundDecode():
     return render_template('ChooseSoundImageDecode.html', title='Sound|Image Choice')
 
-@login_required
 @app.route('/ImageSoundEncode')
+@login_required
 def ImageSoundEncode():
     return render_template('ChooseSoundImageEncode.html', title='Sound|Image Choice')
 
-@login_required
 @app.route('/ImageDecode', methods=['GET','POST'])
+@login_required
 def ImageDecode():
     pass
 
-@login_required
 @app.route('/SoundDecode', methods=['GET','POST'])
+@login_required
 def SoundDecode():
     pass
 
-@login_required
 @app.route('/SoundEncode', methods=['GET','POST'])
+@login_required
 def SoundEncode():
     pass
 
-@login_required
 @app.route('/ImageEncode', methods=['GET','POST'])
+@login_required
 def ImageEncode():
     form = ImageStegnoHide()
     if request.method == 'POST' and form.validate_on_submit():
         file_input = request.files['file_input']
         SafeFilename = secure_filename(file_input.filename)
-        file_input.save(os.path.join(app.config["UPLOAD_IMAGES_ENCODE_STEGNO"],SafeFilename))
+        file_input.save(os.path.join(app.config["UPLOAD_MESSAGES_ENCODE_STEGNO"],SafeFilename))
         Image_file_input = request.files['Image_file_input']
         SafeFilename = secure_filename(Image_file_input.filename)
-        Image_file_input.save(os.path.join(app.config["UPLOAD_MESSAGES_ENCODE_STEGNO"],SafeFilename))
+        Image_file_input.save(os.path.join(app.config["UPLOAD_IMAGES_ENCODE_STEGNO"],SafeFilename))
         flash('Your files have been uploaded!')
         return redirect(url_for('index'))
     else:
         return render_template('FileUploadSQL.html', form=form, title='SQLBuster')
 
 
-@login_required
 @app.route('/DDos', methods=['GET','POST'])
+@login_required
 def DDos():
     form = DDOS()
     if request.method == 'POST' and form.validate_on_submit():

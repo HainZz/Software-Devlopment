@@ -13,6 +13,17 @@ class User(db.Model,UserMixin):
     def check_password(self,password):
         return check_password_hash(self.password_hash, password)
 
+class PCAPDb(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(31))
+    port = db.Column(db.Integer)
+    src_ip = db.Column(db.String(32))
+    Dest_ip = db.Column(db.String(32))
+    Dest_mac = db.Column(db.String(32))
+    Source_mac = db.Column(db.String(32))
+    Output_file = db.Column(db.String(32))
+
+
 
 class DosDb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
