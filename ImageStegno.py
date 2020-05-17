@@ -1,7 +1,6 @@
 from PIL import Image as img
 import binascii
 from os.path import getsize
-import wave
 
 
 #Credit too https://github.com/xandhiller/steg/blob/master/encodeImage.py for the ideas of how to use the classes i really like it :)
@@ -27,23 +26,6 @@ class image:
         self.image_type = self.image.format #TODO Check Image Formats as well as mode 
         self.MaxSize = self.image.size[0] * self.image.size[1]
         self.Image_Mode =  self.image.mode
-
-#https://github.com/pavanchhatpar/wav-steg-py/blob/master/wav-steg.py Credit for helping me understand the way waves works :)
-
-class sound:
-    def __init__(self):
-        self.Sound_File = wave.open("Test.wav","rb")
-        #Opens up a Wave_Read object
-        self.Channles = self.Sound_File.getnchannels() 
-        self.SampleWidth = self.Sound_File.getsampwidth()
-        self.FrameRate = self.Sound_File.getframerate()
-        self.NumberOfFrames = self.Sound_File.getnframes()
-        self.CompressionType = self.Sound_File.getcomptype()
-        self.CompressionName = self.Sound_File.getcompname()
-        #These Variables will be needed later in order to create a new wav file after encoding
-        print(self.Sound_File.readframes(1))
-        
-
 
 def Determine_Hide_Func(Image,Text):
     if Image.Image_Mode == 'L':
@@ -205,24 +187,14 @@ def PrintMessage(Message):
     print('Success We found you a message ! :')
     print(Message)
 
-def DetermineSoundStegnoPossible(Sound):
-    pass
-
 
 if __name__ == "__main__":
-    Image_Or_Sound = input("S = SOUND | I = IMAGE ") #TODO replace this with input from the front-end
     Encode_Or_Decode = input("E = ENCODE | D = DECODE ")
-    if Image_Or_Sound == "I":
-        if Encode_Or_Decode == "E":  
-            Text = text()
-            Image = image()  
-            DetermineStegnoPossible(Image,Text)
-            Determine_Hide_Func(Image,Text)
-        elif Encode_Or_Decode == "D":         
-            Message = Determine_Show_Func()
-            PrintMessage(Message)
-    elif Image_Or_Sound == "S":
-        if Encode_Or_Decode == "E":
-            Text = text()
-            Sound = sound()
-            DetermineSoundStegnoPossible(Sound)
+    if Encode_Or_Decode == "E":  
+        Text = text()
+        Image = image()  
+        DetermineStegnoPossible(Image,Text)
+        Determine_Hide_Func(Image,Text)
+    elif Encode_Or_Decode == "D":         
+        Message = Determine_Show_Func()
+        PrintMessage(Message)
