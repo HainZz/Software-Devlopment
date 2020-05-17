@@ -1,0 +1,17 @@
+  IP,   UDP,   src:     192.168.0.1    dst:        10.0.0.1 ,  sport:      62266  dport:      50905  ether type: 2048
+
+
+TCP packet count: 0
+UDP packet count: 1
+ARP packet count: 0
+other protocol count: 0
+total packet count: 1
+source ip that sent the most packets: 192.168.0.1
+top 5 most packet sending ip's: 
+     ip:     192.168.0.1   count:      1
+     ip:                   count:      0
+     ip:                   count:      0
+     ip:                   count:      0
+     ip:                   count:      0
+source port count: 
+     port num:   62266     count:      1

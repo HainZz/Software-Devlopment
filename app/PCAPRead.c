@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 
 /* contains structs to dismantle each pcap and retrieve info */
 #include <netinet/in.h>
@@ -47,12 +48,29 @@ int partition(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET_
 void swap(int* num1, int* num2);
 void stringswap(char *str1, char *str2);
 
-
+/* Credit too https://stackoverflow.com/questions/43163677/how-do-i-strip-a-file-extension-from-a-string-in-c/43163761 for showing how to strip extensions */
+/* Big credit towards this article showing how to use freopen to direct stdout to a file https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm */
 /* takes 2 args, argc holds the number of arguments passed, argv points to each argument passed  */
 int main(int argc, char **argv){
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap_t *file;
-	
+
+	FILE *fp;
+	char local_file[150];
+	strcpy(local_file,argv[1]);
+	char* filename = basename(local_file);
+	char path[150] = "/home/hainzz/Software-Devlopment/app/static/PCAPCreations/";
+	char *end = filename + strlen(filename);
+	while (end > filename && *end != '.'){
+		--end;
+	}
+	if (end > filename){
+		*end = '\0';
+	}
+	strcat(filename, "Output.txt");
+	strcat(path, filename);
+	fp = freopen(path, "w+", stdout);
+
 	/* checks that a file has been specified in execution */
 	if(argc != 2){ 
 		printf("please include filename in command {%s filename.pcap}\n", argv[0]);
@@ -75,8 +93,7 @@ int main(int argc, char **argv){
     quickSort(pctCount, 0, pctIdx, pctIP, PortNum, 1);
 	quickSort(srcPortCount, 0, PortIdx, pctIP, PortNum, 2);
 	printout();
-	
-
+	fclose(fp);
 	return 0;
 }
 
@@ -263,6 +280,3 @@ void quickSort(int array[], int low, int high, char strArray[PCAP_BUF_SIZE][INET
 
 	}
 }
-
-	
-

@@ -1,8 +1,0 @@
-{% extends "base.html"%}
-{%block title%}{{title}}{%endblock%}
-
-{%block app_content %}
-    <h1>Choose Whether You Want To Decode Sound Or Image</h1>
-    <a class="btn btn-secondary btn-lg" href="{{url_for('SoundDecode')}}">Sound</a>
-    <a class="btn btn-secondary btn-lg" href="{{url_for('ImageDecode')}}">Image</a>
-{% endblock %}
