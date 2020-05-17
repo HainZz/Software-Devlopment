@@ -1,13 +1,12 @@
 from app import app,db #Imports app variable from app and db
-from flask import render_template, flash,redirect, url_for, request, session, send_file
+from flask import render_template, flash,redirect, url_for, request, session, send_from_directory, abort
 from app.forms import LoginForm,RegistrationForm,FileUpload,DDOS,ImageStegnoHide,PCAPFab
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User,DosDb,PCAPDb
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
+from app import PCAPCreator
 import os
-import Murat
-
 
 @app.route('/') #Home /root directory
 @app.route('/index')
@@ -78,8 +77,14 @@ def PCAPFabricator():
         PCAP = PCAPDb(message=form.Message.data,port=form.Port.data,src_ip=form.Source_IP.data,Dest_ip=form.Dest_IP.data,Dest_mac=form.Destination_Mac_Adress.data,Source_mac=form.Source_Mac_Adress.data,Output_file=form.Output_File_Name.data)
         db.session.add(PCAP)
         db.session.commit()
-        flash('Your PCAP information has been saved')
+        flash('Your PCAP information has been saved and will be processed (You should see a download shortly)')
+        PCAPCreator.Run(PCAP.id)
+        try:
+            return send_from_directory(app.config['PCAP_DOWNLOAD_DEST'], filename=PCAP.Output_file, as_attachment=True)
+        except FileNotFoundError:
+            abort(404)
         return redirect(url_for('index'))
+        
     else:
         return render_template('PCAPFAb.html', form=form, title='PCAP Creator')
 

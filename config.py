@@ -11,3 +11,4 @@ class Config(object):
     UPLOAD_MESSAGES_ENCODE_STEGNO = '/home/hainzz/Software-Devlopment/app/static/Stegno/Encode/Messages'
     UPLOAD_IMAGES_DECODE_STEGNO = '/home/hainzz/Software-Devlopment/app/static/Stegno/Decode/Images'
     PCAP_UPLOAD_DEST = '/home/hainzz/Software-Devlopment/app/static/PCAP'
+    PCAP_DOWNLOAD_DEST = '/home/hainzz/Software-Devlopment/app/static/PCAPCreations'

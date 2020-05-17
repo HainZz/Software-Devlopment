@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: a306a49d1c1f
+Revision ID: 7d80d31666bb
 Revises: 
-Create Date: 2020-04-24 12:49:49.476063
+Create Date: 2020-04-29 16:17:02.958210
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a306a49d1c1f'
+revision = '7d80d31666bb'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,10 +23,15 @@ def upgrade():
     sa.Column('ip_addr', sa.String(length=32), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('pcap_files',
+    op.create_table('pcap_db',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('FileName', sa.String(length=64), nullable=True),
-    sa.Column('data', sa.LargeBinary(), nullable=True),
+    sa.Column('message', sa.String(length=31), nullable=True),
+    sa.Column('port', sa.Integer(), nullable=True),
+    sa.Column('src_ip', sa.String(length=32), nullable=True),
+    sa.Column('Dest_ip', sa.String(length=32), nullable=True),
+    sa.Column('Dest_mac', sa.String(length=32), nullable=True),
+    sa.Column('Source_mac', sa.String(length=32), nullable=True),
+    sa.Column('Output_file', sa.String(length=32), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',
@@ -46,6 +51,6 @@ def downgrade():
     op.drop_index(op.f('ix_user_username'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
-    op.drop_table('pcap_files')
+    op.drop_table('pcap_db')
     op.drop_table('dos_db')
     # ### end Alembic commands ###
