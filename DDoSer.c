@@ -55,7 +55,7 @@ int main(int argc, char ** argv)
 	struct sockaddr_in sin;
 
 	sin.sin_family = AF_INET;
-	sin.sin_port  = htons(80)
+	sin.sin_port  = htons(80);
 	
 	memset (datagram, 0, 4096); 
 	
@@ -64,7 +64,7 @@ int main(int argc, char ** argv)
 	iph -> version = 4;			//Version
 	iph -> tos = 0;				
 	iph -> tot_len = sizeof (struct ip) + sizeof (struct tcphdr);
-	iph -> id = htons(rand()) 	//Might be better hard coding a packet ID
+	iph -> id = htons(rand()); 	//Might be better hard coding a packet ID
 	iph -> frag_off = 0;
 	iph -> ttl = 255;			
 	iph -> protocol = IPPROTO_TCP;
@@ -73,8 +73,8 @@ int main(int argc, char ** argv)
 	
 //Setting TCP header parameters
 
-	tcph -> source = htons (1234)	//Source port. Could be randomised?
-	tcph -> dest = htons (80)		//Destination port
+	tcph -> source = htons (1234);	//Source port. Could be randomised?
+	tcph -> dest = htons (80);		//Destination port
 	tcph -> seq = 0;
 	tcph -> ack_seq = 0;
 	tcph -> doff = 5;
@@ -99,7 +99,7 @@ int main(int argc, char ** argv)
 	}
 	
 //Sending the packet in an infinite loop
-	while (1)
+//	while (1)
 	{
 		if (sendto (sock, datagram, iph -> tot_len, 0, (struct sockaddr *) &sin, sizeof (sin)) < 0)
 			{
