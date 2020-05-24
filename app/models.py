@@ -25,11 +25,6 @@ class PCAPDb(db.Model):
 
 
 
-class DosDb(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    ip_addr = db.Column(db.String(32))
-
-
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))

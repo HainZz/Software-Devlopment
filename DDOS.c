@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-
 #include <sys/socket.h>
 #include <stdlib.h>
 
@@ -36,6 +35,7 @@ void destination(int argc, char **argv)
 
 }
 
+/* Credit for shwoing sqlite3 libary in C http://zetcode.com/db/sqlitec/ */
 int main(int argc, char ** argv)
 {
 	source(argc, argv);
@@ -99,7 +99,7 @@ int main(int argc, char ** argv)
 	}
 	
 //Sending the packet in an infinite loop
-	while (1)
+//	while (1)
 	{
 		if (sendto (sock, datagram, iph -> tot_len, 0, (struct sockaddr *) &sin, sizeof (sin)) < 0)
 			{

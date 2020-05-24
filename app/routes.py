@@ -3,12 +3,13 @@ from flask import render_template, flash,redirect, url_for, request, session, se
 from app.forms import LoginForm,RegistrationForm,FileUpload,DDOS,ImageStegnoHide,PCAPFab, ImageStegnoShow #We import all of our forms from the forms.py
 from flask_login import current_user, login_user, logout_user, login_required 
 # Similar too forms but instead we import tables for our SQLite database from models.py
-from app.models import User,DosDb,PCAPDb
+from app.models import User,PCAPDb
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 #This ensures nothing shady happens with filenames that could casue a security risk 
 from app import PCAPCreator,ImageStegno
 #This imports the two python program tools 
+from subprocess import Popen, PIPE
 import os
 
 #Credit goes too this series https://www.youtube.com/watch?v=BUmUV8YOzgM&list=PLF2JzgCW6-YY_TZCmBrbOpgx5pSNBD0_L for teaching me a lot about flask as well this blog https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world 
@@ -159,16 +160,18 @@ def ImageEncode():
     else:
         return render_template('FileUploadSQL.html', form=form, title='SQLBuster')
 
+#https://stackoverflow.com/questions/4408377/how-can-i-get-terminal-output-in-python Credit for showing how to read the terminal
 
 @app.route('/DDos', methods=['GET','POST'])
 @login_required
 def DDos():
     form = DDOS()
     if request.method == 'POST' and form.validate_on_submit():
-        NewRequest = DosDb(ip_addr=form.ip_addr.data)
-        db.session.add(NewRequest)
-        db.session.commit()
-        flash('Your IP has been uploaded')
+        os.system("./DDOS " + form.ip_addr.data + " " + form.ip_addr2.data)
+        print("./DDOS " + form.ip_addr.data + " " + form.ip_addr2.data)
+        print(form.ip_addr.data)
+        print(form.ip_addr2.data)
+        flash('Sent')
         return redirect(url_for('index'))
     else:
         return render_template('DDosInput.html', form=form, title='DDOS')

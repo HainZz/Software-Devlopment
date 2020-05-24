@@ -40,7 +40,8 @@ class PCAPFab(FlaskForm):
     Submit = SubmitField('CREATE')
 
 class DDOS(FlaskForm):
-    ip_addr = StringField('IP Adress', validators=[DataRequired(), IPAddress(message='Invalid IP address', ipv4=True)])
+    ip_addr = StringField('Source IP Adress', validators=[DataRequired(), IPAddress(message='Invalid source IP address', ipv4=True)])
+    ip_addr2 = StringField('Destination IP Adress', validators=[DataRequired(), IPAddress(message='Invalid destination IP address', ipv4=True)])
     submit = SubmitField(label='Enter')
 
 class ImageStegnoHide(FlaskForm):
