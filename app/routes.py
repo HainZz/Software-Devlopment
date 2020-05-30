@@ -160,7 +160,6 @@ def ImageEncode():
     else:
         return render_template('FileUploadSQL.html', form=form, title='SQLBuster')
 
-#https://stackoverflow.com/questions/4408377/how-can-i-get-terminal-output-in-python Credit for showing how to read the terminal
 
 @app.route('/DDos', methods=['GET','POST'])
 @login_required
